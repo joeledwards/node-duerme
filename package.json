@@ -1,0 +1,33 @@
+{
+  "name": "duerme",
+  "version": "1.0.0",
+  "description": "Simple CLI REST API polling utility",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "cake build",
+    "test": "cake test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/joeledwards/node-duerme.git"
+  },
+  "keywords": [
+    "REST",
+    "poller",
+    "poll"
+  ],
+  "author": "Joel Edwards <joeledwards@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joeledwards/node-duerme/issues"
+  },
+  "homepage": "https://github.com/joeledwards/node-duerme#readme",
+  "dependencies": {
+    "axios": "^0.16.2",
+    "durations": "^3.0.0"
+  },
+  "bin": {
+    "duerme": "./bin/duerme"
+  }
+}
