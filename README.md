@@ -35,6 +35,21 @@ Examples
 ============
 
 ```bash
+$ duerme -u http://not.so
+Attempt 1 succeeded. Time elapsed: 456.596 ms
+```
+
+```bash
+$ duerme -t 500 -T 2000 -u http://maybe.so
+Attempt 1 failed (16.401 ms elapsed) : Error: getaddrinfo ENOTFOUND maybe.so maybe.so:80
+Attempt 2 failed (509.165 ms elapsed) : Error: getaddrinfo ENOTFOUND maybe.so maybe.so:80
+Attempt 3 failed (1.009 s elapsed) : Error: getaddrinfo ENOTFOUND maybe.so maybe.so:80
+Attempt 4 failed (1.516 s elapsed) : Error: getaddrinfo ENOTFOUND maybe.so maybe.so:80
+Attempt 5 failed (2.005 s elapsed) : Error: getaddrinfo ENOTFOUND maybe.so maybe.so:80
+All 5 attempts failed over 2.005 s
+```
+
+```bash
 $ duerme -v -s 404 -t 500 -T 2000 -u http://not.so
 Config:
  { method: 'GET',
