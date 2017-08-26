@@ -60,7 +60,14 @@ parseMethod = (method) ->
   method = method.toUpperCase()
   switch method
     when "OPTIONS", "HEAD", "GET", "POST", "PUT", "PATCH", "DELETE" then method
-    else throw new Error("Invalid method \"#{method}\"")
+    else undefined
+
+# If a value is empty-ish, supply an alterate, otherwise the value
+orElse = (value, alternate) ->
+  if value == NaN
+    alternate
+  else
+    value ? alternate
 
 # Script was run directly
 runScript = () ->
@@ -72,16 +79,23 @@ runScript = () ->
     .option '-t, --connect-timeout <milliseconds>', 'Individual connection attempt timeout (default is 250)', parseInt
     .option '-T, --total-timeout <milliseconds>', 'Total timeout across all connect attempts (dfault is 15000)', parseInt
     .option '-u, --url <url>', 'URL (default is http://localhost:8080)'
+    .option '-v, --verbose', 'make output more verbose (default is false, superceded by -q option)'
     .parse(process.argv)
 
   config =
     method: program.host ? 'GET'
     payload: program.payload ? {}
     quiet: program.quiet ? false
-    status: program.status ? 200
-    connectTimeout: program.connectTimeout ? 1000
-    totalTimeout: program.totalTimeout ? 15000
+    status: orElse program.status, 200
+    connectTimeout: orElse program.connectTimeout, 1000
+    totalTimeout: orElse program.totalTimeout, 15000
     url: program.url ? 'http://localhost:8080'
+    verbose: program.verbose ? false
+
+  if config.quiet
+    config.verbose = false
+
+  console.log "Config:\n", config if config.verbose
 
   pollRoute config
   .then (code) -> process.exit code
