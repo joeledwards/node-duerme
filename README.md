@@ -40,7 +40,7 @@ Config:
  { method: 'GET',
   payload: {},
   quiet: false,
-  status: 20,
+  status: 404,
   connectTimeout: 500,
   totalTimeout: 2000,
   url: 'http://not.so',
