@@ -17,16 +17,20 @@ pollRoute = (config) ->
     attempts = 0
 
     # Re-try the query after a delay
-    retry = ->
+    retry = (requestWatch) ->
       if watch.duration().millis() > totalTimeout
         console.log "All #{attempts} attempts failed over #{watch}"
         resolve 1
       else
-        delay = Math.min connectTimeout, Math.max(0, totalTimeout - watch.duration().millis())
+        remaining = Math.max 0, connectTimeout - requestWatch.duration().millis()
+        cap = Math.max 0, totalTimeout - watch.duration().millis()
+        delay = Math.min cap, remaining
         setTimeout doRequest, delay
 
     # Perform the request
     doRequest = ->
+      requestWatch = durations.stopwatch().start()
+
       request =
         method: method
         url: url
@@ -36,17 +40,18 @@ pollRoute = (config) ->
 
       axios request
       .then (response) ->
-        attempts = attempts + 1 
+        attempts++
         if response.status == status
           console.log "Attempt #{attempts} succeeded. Time elapsed: #{watch}" if not quiet
           watch.stop
           resolve 0
         else
           console.log "Attempt #{attempts} failed with status #{response.status} (#{watch} elapsed)" if not quiet
-          retry()
+          retry requestWatch
       .catch (error) ->
+        attempts++
         console.log "Attempt #{attempts} failed (#{watch} elapsed) : #{error}" if not quiet
-        retry()
+        retry requestWatch
 
     doRequest()
 
