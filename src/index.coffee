@@ -32,6 +32,7 @@ pollRoute = (config) ->
         url: url
         data: if method == 'get' then undefined else payload
         timeout: connectTimeout
+        validateStatus: -> true
 
       axios request
       .then (response) ->
