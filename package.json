@@ -6,6 +6,7 @@
   "scripts": {
     "prepublish": "npm run build",
     "build": "cake build",
+    "start": "coffee src/index.coffee",
     "test": "cake test"
   },
   "repository": {
@@ -25,6 +26,9 @@
   "homepage": "https://github.com/joeledwards/node-duerme#readme",
   "dependencies": {
     "axios": "^0.16.2",
+    "bluebird": "^3.5.0",
+    "coffee-script": "^1.12.7",
+    "commander": "^2.11.0",
     "durations": "^3.0.0"
   },
   "bin": {
