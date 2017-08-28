@@ -97,6 +97,8 @@ runScript = () ->
 
   console.log "Config:\n", config if config.verbose
 
+  console.log "Polling #{config.url}" if not config.quiet
+
   pollRoute config
   .then (code) -> process.exit code
 
