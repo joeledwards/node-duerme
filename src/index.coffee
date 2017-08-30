@@ -6,7 +6,7 @@ durations = require 'durations'
 # Wait for Postgres to become available
 pollRoute = (program) ->
   config =
-    method: program.host ? 'GET'
+    method: program.method ? 'GET'
     payload: program.payload ? {}
     quiet: program.quiet ? false
     status: orElse program.status, 200
