@@ -1,6 +1,6 @@
 {
   "name": "duerme",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Simple CLI REST API polling utility",
   "main": "lib/index.js",
   "scripts": {
