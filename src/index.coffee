@@ -4,7 +4,24 @@ program = require 'commander'
 durations = require 'durations'
 
 # Wait for Postgres to become available
-pollRoute = (config) ->
+pollRoute = (program) ->
+  config =
+    method: program.host ? 'GET'
+    payload: program.payload ? {}
+    quiet: program.quiet ? false
+    status: orElse program.status, 200
+    connectTimeout: orElse program.connectTimeout, 1000
+    totalTimeout: orElse program.totalTimeout, 15000
+    url: program.url ? 'http://localhost:8080'
+    verbose: program.verbose ? false
+
+  if config.quiet
+    config.verbose = false
+
+  console.log "Config:\n", config if config.verbose
+
+  console.log "Polling #{config.url}" if not config.quiet
+
   new P (resolve, reject) ->
     {
       method, url, payload,
@@ -82,24 +99,7 @@ runScript = () ->
     .option '-v, --verbose', 'make output more verbose (default is false, superceded by -q option)'
     .parse(process.argv)
 
-  config =
-    method: program.host ? 'GET'
-    payload: program.payload ? {}
-    quiet: program.quiet ? false
-    status: orElse program.status, 200
-    connectTimeout: orElse program.connectTimeout, 1000
-    totalTimeout: orElse program.totalTimeout, 15000
-    url: program.url ? 'http://localhost:8080'
-    verbose: program.verbose ? false
-
-  if config.quiet
-    config.verbose = false
-
-  console.log "Config:\n", config if config.verbose
-
-  console.log "Polling #{config.url}" if not config.quiet
-
-  pollRoute config
+  pollRoute program
   .then (code) -> process.exit code
 
 # Module
@@ -110,4 +110,3 @@ module.exports =
 # If run directly
 if require.main == module
   runScript()
-
