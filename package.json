@@ -4,7 +4,7 @@
   "description": "Simple CLI REST API polling utility",
   "main": "lib/index.js",
   "scripts": {
-    "prepublish": "npm run build",
+    "prepublish": "npm run test && npm run build",
     "build": "cake build",
     "start": "coffee src/index.coffee",
     "test": "cake test"
