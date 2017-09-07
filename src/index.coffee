@@ -10,10 +10,12 @@ pollRoute = (program) ->
     payload: program.payload ? {}
     quiet: program.quiet ? false
     status: orElse program.status, 200
+    connectFrequency: orElse program.connectFrequency, 1000
     connectTimeout: orElse program.connectTimeout, 1000
     totalTimeout: orElse program.totalTimeout, 15000
     url: program.url ? 'http://localhost:8080'
     verbose: program.verbose ? false
+    regex: program.regex
 
   if config.quiet
     config.verbose = false
@@ -25,7 +27,8 @@ pollRoute = (program) ->
   new P (resolve, reject) ->
     {
       method, url, payload,
-      status, quiet, connectTimeout, totalTimeout
+      status, regex, quiet,
+      connectFrequency, connectTimeout, totalTimeout
     } = config
 
     # timeouts in milliseconds
@@ -33,13 +36,19 @@ pollRoute = (program) ->
     connectWatch = durations.stopwatch()
     attempts = 0
 
+    result = (code) ->
+      code: code
+      duration: watch.duration()
+      attempts: attempts
+
     # Re-try the query after a delay
     retry = (requestWatch) ->
       if watch.duration().millis() > totalTimeout
+        watch.stop()
         console.log "All #{attempts} attempts failed over #{watch}"
-        resolve 1
+        resolve result(1)
       else
-        remaining = Math.max 0, connectTimeout - requestWatch.duration().millis()
+        remaining = Math.max 0, connectFrequency - requestWatch.duration().millis()
         cap = Math.max 0, totalTimeout - watch.duration().millis()
         delay = Math.min cap, remaining
         setTimeout doRequest, delay
@@ -48,20 +57,34 @@ pollRoute = (program) ->
     doRequest = ->
       requestWatch = durations.stopwatch().start()
 
+      # Options to axios
       request =
         method: method
         url: url
         data: if method == 'get' then undefined else payload
         timeout: connectTimeout
-        validateStatus: -> true
+        validateStatus: -> true # We will do our own validation
 
       axios request
       .then (response) ->
+        checkResponse = (data) ->
+          if regex?
+            body = if typeof data == 'string' then data else JSON.stringify(data)
+            body.match regex
+          else
+            true
+
         attempts++
         if response.status == status
-          console.log "Attempt #{attempts} succeeded. Time elapsed: #{watch}" if not quiet
+          passed = checkResponse response.data
           watch.stop
-          resolve 0
+
+          if passed
+            console.log "Attempt #{attempts} succeeded. Time elapsed: #{watch}" if not quiet
+            resolve result(0)
+          else
+            console.log "Attempt #{attempts} failed due to regex mismatch (#{watch} elapsed)" if not quiet
+            retry requestWatch
         else
           console.log "Attempt #{attempts} failed with status #{response.status} (#{watch} elapsed)" if not quiet
           retry requestWatch
@@ -89,18 +112,20 @@ orElse = (value, alternate) ->
 # Script was run directly
 runScript = () ->
   program
+    .option '-f, --connect-frequency <milliseconds>', 'Retry frequency (default is 1000)', parseMethod
     .option '-m, --method <method>', 'HTTP method (default is GET)', parseMethod
     .option '-p, --payload <payload>', 'JSON Payload (default is {})', JSON.parse
     .option '-q, --quiet', 'Silence non-error output (default is false)'
+    .option '-r, --regex <regex>', 'Payload validation regex (default is undefined)'
     .option '-s, --status <status>', 'Success status code (default is 200)', parseInt
-    .option '-t, --connect-timeout <milliseconds>', 'Individual connection attempt timeout (default is 250)', parseInt
+    .option '-t, --connect-timeout <milliseconds>', 'Individual connection attempt timeout (default is 1000)', parseInt
     .option '-T, --total-timeout <milliseconds>', 'Total timeout across all connect attempts (dfault is 15000)', parseInt
     .option '-u, --url <url>', 'URL (default is http://localhost:8080)'
     .option '-v, --verbose', 'make output more verbose (default is false, superceded by -q option)'
     .parse(process.argv)
 
   pollRoute program
-  .then (code) -> process.exit code
+  .then ({code}) -> process.exit code
 
 # Module
 module.exports =
