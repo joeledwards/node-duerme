@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/joeledwards/node-duerme#readme",
   "dependencies": {
+    "@buzuli/color": "^1.1.1",
     "axios": "^0.16.2",
     "bluebird": "^3.5.0",
     "coffee-script": "^1.12.7",
