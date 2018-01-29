@@ -60,8 +60,9 @@ pollRoute = (program) ->
         console.log "#{emoji.key('x')}  All #{orange(attempts)} attempts failed over #{blue(watch)}"
         resolve result(1)
       else
-        remaining = Math.max 0, connectFrequency - requestWatch.duration().millis()
-        cap = Math.max 0, totalTimeout - watch.duration().millis()
+        remaining = Math.max(0, connectFrequency - requestWatch.duration().millis())
+        cap = Math.max(0, totalTimeout - watch.duration().millis())
+        console.log "remaining=#{remaining} cap=#{cap}"
         delay = Math.min cap, remaining
         setTimeout doRequest, delay
 
@@ -124,7 +125,7 @@ orElse = (value, alternate) ->
 # Script was run directly
 runScript = () ->
   program
-    .option '-f, --connect-frequency <milliseconds>', 'Retry frequency (default is 1000)', parseMethod
+    .option '-f, --connect-frequency <milliseconds>', 'Retry frequency (default is 1000)', parseInt
     .option '-m, --method <method>', 'HTTP method (default is GET)', parseMethod
     .option '-p, --payload <payload>', 'JSON Payload (default is {})', JSON.parse
     .option '-q, --quiet', 'Silence non-error output (default is false)'
