@@ -62,7 +62,6 @@ pollRoute = (program) ->
       else
         remaining = Math.max(0, connectFrequency - requestWatch.duration().millis())
         cap = Math.max(0, totalTimeout - watch.duration().millis())
-        console.log "remaining=#{remaining} cap=#{cap}"
         delay = Math.min cap, remaining
         setTimeout doRequest, delay
 
