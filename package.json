@@ -30,7 +30,7 @@
     "bluebird": "^3.5.0",
     "coffee-script": "^1.12.7",
     "commander": "^2.11.0",
-    "durations": "^3.0.0",
+    "durations": "^3.4.1",
     "express": "^4.15.4"
   },
   "bin": {

@@ -1,29 +1,40 @@
 P = require 'bluebird'
 axios = require 'axios'
 program = require 'commander'
-durations = require 'durations'
-{blue, emoji, green, orange, purple, red} = require '@buzuli/color'
+{millis, stopwatch} = require 'durations'
+{blue, emoji, gray, green, orange, purple, red, yellow} = require '@buzuli/color'
 
 # Wait for Postgres to become available
 pollRoute = (program) ->
   config =
     method: program.method ? 'GET'
-    payload: program.payload ? {}
-    quiet: program.quiet ? false
+    url: program.url ? 'http://localhost:8080'
+    payload: program.payload ? '{}'
     status: orElse program.status, 200
+    regex: program.regex
+    quiet: program.quiet ? false
     connectFrequency: orElse program.connectFrequency, 1000
     connectTimeout: orElse program.connectTimeout, 1000
     totalTimeout: orElse program.totalTimeout, 15000
-    url: program.url ? 'http://localhost:8080'
     verbose: program.verbose ? false
-    regex: program.regex
 
   if config.quiet
     config.verbose = false
 
-  console.log "Config:\n#{purple(JSON.stringify(config, null, 2))}" if config.verbose
+  if config.verbose
+    console.log "Config:"
+    console.log "            method : #{yellow config.method}"
+    console.log "               url : #{green config.url}"
+    console.log "           payload : #{gray config.payload}"
+    console.log "            status : #{orange config.status}"
+    console.log "             regex : #{green(config.regex ? '--')}"
+    console.log " connect frequency : #{blue millis config.connectFrequency}"
+    console.log "   connect timeout : #{blue millis config.connectTimeout}"
+    console.log "     total timeout : #{blue millis config.totalTimeout}"
+    console.log "             quiet : #{purple config.quiet}"
+    console.log "           verbose : #{purple config.verbose}"
 
-  console.log "Polling #{blue(config.url)}" if not config.quiet
+  console.log "Polling #{green(config.url)}" if not config.quiet
 
   new P (resolve, reject) ->
     {
@@ -33,8 +44,8 @@ pollRoute = (program) ->
     } = config
 
     # timeouts in milliseconds
-    watch = durations.stopwatch().start()
-    connectWatch = durations.stopwatch()
+    watch = stopwatch().start()
+    connectWatch = stopwatch()
     attempts = 0
 
     result = (code) ->
@@ -46,7 +57,7 @@ pollRoute = (program) ->
     retry = (requestWatch) ->
       if watch.duration().millis() > totalTimeout
         watch.stop()
-        console.log "#{emoji.key('x')}  All #{orange(attempts)} attempts failed over #{green(watch)}"
+        console.log "#{emoji.key('x')}  All #{orange(attempts)} attempts failed over #{blue(watch)}"
         resolve result(1)
       else
         remaining = Math.max 0, connectFrequency - requestWatch.duration().millis()
@@ -56,7 +67,7 @@ pollRoute = (program) ->
 
     # Perform the request
     doRequest = ->
-      requestWatch = durations.stopwatch().start()
+      requestWatch = stopwatch().start()
 
       # Options to axios
       request =
@@ -81,17 +92,17 @@ pollRoute = (program) ->
           watch.stop
 
           if passed
-            console.log "#{emoji.key('white_check_mark')}  Attempt #{orange(attempts)} succeeded. Time elapsed: #{green(watch)}" if not quiet
+            console.log "#{emoji.key('white_check_mark')}  Attempt #{orange(attempts)} succeeded. Time elapsed: #{blue(watch)}" if not quiet
             resolve result(0)
           else
-            console.log "#{emoji.key('warning')}  Attempt #{orange(attempts)} failed due to regex mismatch (#{green(watch)} elapsed)" if not quiet
+            console.log "#{emoji.key('warning')}  Attempt #{orange(attempts)} failed due to regex mismatch (#{blue(watch)} elapsed)" if not quiet
             retry requestWatch
         else
-          console.log "#{emoji.key('warning')}  Attempt #{orange(attempts)} failed with status #{orange(response.status)} (#{green(watch)} elapsed)" if not quiet
+          console.log "#{emoji.key('warning')}  Attempt #{orange(attempts)} failed with status #{red(response.status)} (#{blue(watch)} elapsed)" if not quiet
           retry requestWatch
       .catch (error) ->
         attempts++
-        console.log "#{emoji.key('warning')}  Attempt #{orange(attempts)} failed (#{green(watch)} elapsed) : #{red(error)}" if not quiet
+        console.log "#{emoji.key('warning')}  Attempt #{orange(attempts)} failed (#{blue(watch)} elapsed) : #{red(error)}" if not quiet
         retry requestWatch
 
     doRequest()
