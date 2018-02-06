@@ -4,6 +4,10 @@ program = require 'commander'
 {millis, stopwatch} = require 'durations'
 {blue, emoji, gray, green, orange, purple, red, yellow} = require '@buzuli/color'
 
+defaultConnectFrequency = 5000
+defaultConnectTimeout = 2500
+defaultTotalTimeout = 60000
+
 # Wait for Postgres to become available
 pollRoute = (program) ->
   config =
@@ -13,9 +17,9 @@ pollRoute = (program) ->
     status: orElse program.status, 200
     regex: program.regex
     quiet: program.quiet ? false
-    connectFrequency: orElse program.connectFrequency, 1000
-    connectTimeout: orElse program.connectTimeout, 1000
-    totalTimeout: orElse program.totalTimeout, 15000
+    connectFrequency: orElse program.connectFrequency, defaultConnectFrequency
+    connectTimeout: orElse program.connectTimeout, defaultConnectTimeout
+    totalTimeout: orElse program.totalTimeout, defaultTotalTimeout
     verbose: program.verbose ? false
 
   if config.quiet
@@ -124,16 +128,16 @@ orElse = (value, alternate) ->
 # Script was run directly
 runScript = () ->
   program
-    .option '-f, --connect-frequency <milliseconds>', 'Retry frequency (default is 1000)', parseInt
+    .option '-f, --connect-frequency <milliseconds>', "Retry frequency (default is #{defaultConnectFrequency})", parseInt
     .option '-m, --method <method>', 'HTTP method (default is GET)', parseMethod
     .option '-p, --payload <payload>', 'JSON Payload (default is {})', JSON.parse
-    .option '-q, --quiet', 'Silence non-error output (default is false)'
-    .option '-r, --regex <regex>', 'Payload validation regex (default is undefined)'
+    .option '-q, --quiet', 'Silence non-error output (default is false; overrides -v option)'
+    .option '-r, --regex <regex>', 'Payload validation regex'
     .option '-s, --status <status>', 'Success status code (default is 200)', parseInt
-    .option '-t, --connect-timeout <milliseconds>', 'Individual connection attempt timeout (default is 1000)', parseInt
-    .option '-T, --total-timeout <milliseconds>', 'Total timeout across all connect attempts (dfault is 15000)', parseInt
+    .option '-t, --connect-timeout <milliseconds>', "Individual connection attempt timeout (default is #{defaultConnectTimeout})", parseInt
+    .option '-T, --total-timeout <milliseconds>', "Total timeout across all connect attempts (dfault is #{defaultTotalTimeout})", parseInt
     .option '-u, --url <url>', 'URL (default is http://localhost:8080)'
-    .option '-v, --verbose', 'make output more verbose (default is false, superceded by -q option)'
+    .option '-v, --verbose', 'make output more verbose (default is false)'
     .parse(process.argv)
 
   pollRoute program

@@ -25,11 +25,11 @@
   },
   "homepage": "https://github.com/joeledwards/node-duerme#readme",
   "dependencies": {
-    "@buzuli/color": "^1.1.1",
+    "@buzuli/color": "^1.2.0",
     "axios": "^0.16.2",
     "bluebird": "^3.5.0",
     "coffee-script": "^1.12.7",
-    "commander": "^2.11.0",
+    "commander": "^2.14.0",
     "durations": "^3.4.1",
     "express": "^4.15.4"
   },
