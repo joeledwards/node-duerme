@@ -2,16 +2,13 @@
   "name": "duerme",
   "version": "2.0.0",
   "description": "Simple CLI REST API polling utility",
+  "repository": "github:joeledwards/node-duerme",
   "main": "lib/index.js",
   "scripts": {
     "prepublish": "npm run test && npm run build",
     "build": "cake build",
     "start": "coffee src/index.coffee",
     "test": "cake test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/joeledwards/node-duerme.git"
   },
   "keywords": [
     "REST",
