@@ -1,6 +1,6 @@
 {
   "name": "duerme",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Simple CLI REST API polling utility",
   "repository": "github:joeledwards/node-duerme",
   "main": "lib/index.js",
