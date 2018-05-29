@@ -1,3 +1,4 @@
 /node_modules
 /lib
 *.swp
+/package-lock.json
